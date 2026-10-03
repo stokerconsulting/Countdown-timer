@@ -9,6 +9,7 @@ struct EventEditor: View {
     @State private var emoji: String
     @State private var date: Date
     @State private var themeIndex: Int
+    @State private var notify: Bool
 
     private let emojis = ["🎂", "✈️", "🎄", "💍", "🎓", "🏖️", "🎉", "🏆", "🏠", "👶", "🎁", "⚽️"]
 
@@ -18,6 +19,7 @@ struct EventEditor: View {
         _emoji = State(initialValue: event?.emoji ?? "🎉")
         _date = State(initialValue: event?.date ?? Calendar.current.date(byAdding: .day, value: 30, to: .now)!)
         _themeIndex = State(initialValue: event?.themeIndex ?? 0)
+        _notify = State(initialValue: event?.notify ?? true)
     }
 
     var body: some View {
@@ -38,6 +40,11 @@ struct EventEditor: View {
                 }
                 Section("Datum en tijd") {
                     DatePicker("Moment", selection: $date, in: Date.now...)
+                }
+                Section {
+                    Toggle("Meldingen", isOn: $notify)
+                } footer: {
+                    Text("Een dag van tevoren en op het moment zelf.")
                 }
                 Section("Kleur") {
                     HStack(spacing: 14) {
@@ -79,6 +86,8 @@ struct EventEditor: View {
         event.emoji = emoji
         event.date = date
         event.themeIndex = themeIndex
+        event.notify = notify
+        if notify { NotificationManager.requestAuthorization() }
         store.upsert(event)
         dismiss()
     }

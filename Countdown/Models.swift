@@ -34,6 +34,24 @@ struct CountdownEvent: Identifiable, Codable, Equatable {
     var date: Date
     var created: Date = .now
     var themeIndex: Int
+    var notify: Bool = true
+
+    init(id: UUID = UUID(), title: String, emoji: String, date: Date,
+         created: Date = .now, themeIndex: Int, notify: Bool = true) {
+        self.id = id; self.title = title; self.emoji = emoji; self.date = date
+        self.created = created; self.themeIndex = themeIndex; self.notify = notify
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(UUID.self, forKey: .id)
+        title = try c.decode(String.self, forKey: .title)
+        emoji = try c.decode(String.self, forKey: .emoji)
+        date = try c.decode(Date.self, forKey: .date)
+        created = try c.decode(Date.self, forKey: .created)
+        themeIndex = try c.decode(Int.self, forKey: .themeIndex)
+        notify = try c.decodeIfPresent(Bool.self, forKey: .notify) ?? true
+    }
 }
 
 @Observable
@@ -54,6 +72,7 @@ final class EventStore {
         } else {
             events = []
         }
+        events.forEach(NotificationManager.schedule)
     }
 
     func upsert(_ event: CountdownEvent) {
@@ -63,10 +82,14 @@ final class EventStore {
             events.append(event)
         }
         events.sort { $0.date < $1.date }
+        if let saved = events.first(where: { $0.id == event.id }) {
+            NotificationManager.schedule(saved)
+        }
     }
 
     func delete(_ event: CountdownEvent) {
         events.removeAll { $0.id == event.id }
+        NotificationManager.cancel(event)
     }
 
     private func save() {
