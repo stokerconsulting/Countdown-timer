@@ -11,3 +11,7 @@ open Countdown.xcodeproj
 ```
 
 Kies een simulator of je iPhone en druk op Run. Zonder XcodeGen: maak een nieuw iOS-App-project ("Countdown", SwiftUI) en sleep de bestanden uit `Countdown/` erin.
+
+## Apple Watch
+
+`CountdownWatch/` is de watchOS-app (watchOS 10+). De events komen van de iPhone via WatchConnectivity (`PhoneConnectivity.swift` → `WatchStore.swift`); de watch is alleen-lezen. Gedeelde modellen staan in `Shared/`. Bewerken doe je op de iPhone. Installeer de iPhone-app, dan verschijnt de watch-app op de gekoppelde Apple Watch.
